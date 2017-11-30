@@ -10,7 +10,7 @@ import pl.patrykn.activityjumper.library.dropTable
 private val DatabaseName = "MyDatabase"
 private val DatabaseVersion = 1
 
-object Location: TableSchema("LOCATION"
+object TableLocation : TableSchema("LOCATION"
         , column.ID to INTEGER + PRIMARY_KEY
         , column.NAME to TEXT + NOT_NULL) {
 
@@ -20,7 +20,7 @@ object Location: TableSchema("LOCATION"
     }
 }
 
-object Dane: TableSchema("DATA"
+object TableDane : TableSchema("DATA"
         , column.ID to INTEGER + PRIMARY_KEY
         , column.CODE to TEXT + NOT_NULL
         , column.VALUE to TEXT + NOT_NULL) {
@@ -46,13 +46,13 @@ class DataHelper(ctx: Context) : ManagedSQLiteOpenHelper(ctx, DatabaseName, null
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.createTable(Location);
-        db.createTable(Dane);
+        db.createTable(TableLocation);
+        db.createTable(TableDane);
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.dropTable(Location)
-        db.dropTable(Dane)
+        db.dropTable(TableLocation)
+        db.dropTable(TableDane)
     }
 }
 
