@@ -1,5 +1,6 @@
 package pl.patrykn.activityjumper.library
 
+import android.content.Context
 import android.database.Cursor
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -10,31 +11,24 @@ abstract class GenericAdapter<Item>: RecyclerView.Adapter<GenericAdapter.ViewHol
     var onItemClickListener: ((holder : ViewHolder<Item>) -> Boolean)? = null
     var onItemLongClickListener: ((holder : ViewHolder<Item>) -> Boolean)? = null
 
-    fun GetLayoutInflaterView(parent: ViewGroup, layoutId: Int): View {
-        return LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
-    }
-
-    abstract fun getItem(position: Int): Item
+    abstract fun getItem(position: Int): Item?
 
     override fun onBindViewHolder(holder: ViewHolder<Item>, position: Int) {
-        fun onClickWrapper(onItemClickListener: ((holder : ViewHolder<Item>) -> Boolean)?, holder: ViewHolder<Item>): Boolean {
-            if ( onItemClickListener != null ) {
-                return onItemClickListener(holder)
-            }
-            return false;
-        }
-
         val item = getItem(position)
-        holder.setup(item)
+        if ( item != null ) {
+            holder.setup(item)
+        }
         holder.view.setOnClickListener {
-            onClickWrapper(onItemClickListener, holder)
+            onItemClickListener?.invoke(holder) ?: false
         }
         holder.view.setOnLongClickListener {
-            onClickWrapper(onItemLongClickListener, holder)
+            onItemLongClickListener?.invoke(holder) ?: false
         }
     }
 
     abstract class ViewHolder<TYPE>(val view: View) : RecyclerView.ViewHolder(view) {
+        constructor(layoutId: Int, parent: ViewGroup) : this(GetLayoutInflaterView(layoutId, parent))
+
         var item: TYPE? = null
             private set
 
@@ -51,27 +45,25 @@ abstract class GenericAdapter<Item>: RecyclerView.Adapter<GenericAdapter.ViewHol
     }
 }
 
+abstract class VariableAdapter<Item, Source>
+  ( open var source: Source? = null )
+  : GenericAdapter<Item>()
+
+abstract class ListAdapter<Item>
+  ( override var source: List<Item>? )
+  : VariableAdapter<Item, List<Item>>(source) {
+    override fun getItemCount(): Int {
+        return source?.size ?: 0
+    }
+
+    override fun getItem(position: Int): Item? {
+        return source?.get(position)
+    }
+}
+
 abstract class CursorAdapter: GenericAdapter<Cursor?>() {
     var cursor: Cursor? = null
         private set
-
-    fun refresh() {
-        val cursor = swapCursor()
-        notifyDataSetChanged()
-        close(cursor)
-    }
-
-    fun swapCursor(): Cursor? {
-        return swapCursor(getCreateCursor())
-    }
-
-    fun swapCursor(cursor: Cursor): Cursor? {
-        val oldCursor = this.cursor
-        this.cursor = cursor
-        return oldCursor
-    }
-
-    abstract fun getCreateCursor(): Cursor
 
     override fun getItem(position: Int): Cursor? {
         if ( cursor?.moveToPosition(position) == true ) {
@@ -82,8 +74,26 @@ abstract class CursorAdapter: GenericAdapter<Cursor?>() {
     }
 
     override fun getItemCount(): Int {
-        return cursor?.getCount() ?: 0
+        return cursor?.count ?: 0
     }
+
+    fun refresh() {
+        val cursor = swapCursor()
+        notifyDataSetChanged()
+        close(cursor)
+    }
+
+    fun swapCursor(): Cursor? {
+        return swapCursor(generateCursor());
+    }
+
+    fun swapCursor(cursor: Cursor?): Cursor? {
+        val oldCursor = this.cursor
+        this.cursor = cursor
+        return oldCursor
+    }
+
+    abstract fun generateCursor(): Cursor?
 
     fun close(cursor: Cursor?) {
         if ( cursor?.isClosed == false ) {
@@ -92,12 +102,10 @@ abstract class CursorAdapter: GenericAdapter<Cursor?>() {
     }
 }
 
-abstract class ListAdapter<TYPE>(var list: List<TYPE?>?) : GenericAdapter<TYPE?>() {
-    override fun getItem(position: Int): TYPE? {
-        return list?.get(position)
-    }
+fun GetLayoutInflaterView(layoutId: Int, parent: ViewGroup): View {
+    return GetLayoutInflaterView(parent.context, layoutId, parent)
+}
 
-    override fun getItemCount(): Int {
-        return list?.size ?: 0
-    }
+fun GetLayoutInflaterView(context: Context, layoutId: Int, parent: ViewGroup? = null): View {
+    return LayoutInflater.from(context).inflate(layoutId, parent, false)
 }
