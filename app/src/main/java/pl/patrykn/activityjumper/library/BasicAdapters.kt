@@ -14,10 +14,7 @@ abstract class GenericAdapter<Item>: RecyclerView.Adapter<GenericAdapter.ViewHol
     abstract fun getItem(position: Int): Item?
 
     override fun onBindViewHolder(holder: ViewHolder<Item>, position: Int) {
-        val item = getItem(position)
-        if ( item != null ) {
-            holder.setup(item)
-        }
+        holder.item = getItem(position)
         holder.view.setOnClickListener {
             onItemClickListener?.invoke(holder) ?: false
         }
@@ -26,18 +23,22 @@ abstract class GenericAdapter<Item>: RecyclerView.Adapter<GenericAdapter.ViewHol
         }
     }
 
-    abstract class ViewHolder<TYPE>(val view: View) : RecyclerView.ViewHolder(view) {
-        constructor(layoutId: Int, parent: ViewGroup) : this(GetLayoutInflaterView(layoutId, parent))
+    abstract class ViewHolder<TYPE>(open val view: View) : RecyclerView.ViewHolder(view) {
+        constructor(context: Context, layoutId: Int, parent: ViewGroup?) : this(GetLayoutInflaterView(context, layoutId, parent))
 
         var item: TYPE? = null
-            private set
-
-        fun setup(item: TYPE) {
-            this.item = item
-            set(item)
-        }
+            set(value) {
+                field = value
+                if ( value != null ) {
+                    set(value)
+                }
+            }
 
         abstract fun set(item: TYPE)
+
+        fun <T : View> findViewById(id: Int): T {
+            return view.findViewById(id)
+        }
     }
 
     protected fun getAdapter(): GenericAdapter<Item> {
@@ -106,6 +107,6 @@ fun GetLayoutInflaterView(layoutId: Int, parent: ViewGroup): View {
     return GetLayoutInflaterView(parent.context, layoutId, parent)
 }
 
-fun GetLayoutInflaterView(context: Context, layoutId: Int, parent: ViewGroup? = null): View {
+fun GetLayoutInflaterView(context: Context, layoutId: Int, parent: ViewGroup?): View {
     return LayoutInflater.from(context).inflate(layoutId, parent, false)
 }
