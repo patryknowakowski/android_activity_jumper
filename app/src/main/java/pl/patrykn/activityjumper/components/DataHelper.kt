@@ -60,6 +60,10 @@ class DataHelper(ctx: Context) : ManagedSQLiteOpenHelper(ctx, DatabaseName, null
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.dropTable(TableApplications)
     }
+
+    /*fun insert(appItem: AppItem): Int {
+        return
+    }*/
 }
 
 // Access property for Context

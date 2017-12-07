@@ -41,7 +41,10 @@ data class AppItem private constructor
 fun PackageManager.GetAppItemList(flag: Int = 0): List<AppItem> {
     val list = ArrayList<AppItem>()
     for ( app in this.getInstalledApplications(flag) ) {
-        list.add(AppItem(app, this.getApplicationLabel(app)));
+        val item =  AppItem(app, this.getApplicationLabel(app))
+        if ( !item.packageName.startsWith("com.android.") && !item.packageName.startsWith("com.google.android.") ) {
+            list.add(item);
+        }
     }
 
     return list

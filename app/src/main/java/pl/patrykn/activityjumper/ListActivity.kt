@@ -1,19 +1,26 @@
 package pl.patrykn.activityjumper
-import android.content.Intent
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_list.*
 import pl.patrykn.activityjumper.components.AppItem
 import pl.patrykn.activityjumper.components.GetAppItemList
+import pl.patrykn.activityjumper.library.AsyncDialog
+import pl.patrykn.activityjumper.library.AsyncDialogProgress
 import pl.patrykn.activityjumper.library.ListAdapter
+import java.util.*
+
 
 class ListActivity : AppCompatActivity() {
-    private val LOG_TAG = this::class.java!!.getSimpleName()
+    private val LOG_TAG = this::class.java.simpleName
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,19 +38,48 @@ class ListActivity : AppCompatActivity() {
                 val packgeName: TextView = findViewById(R.id.list_activity_item__package)
 
                 override fun set(item: AppItem) {
-                    appName.setText(item.label)
-                    packgeName.setText(item.packageName)
+                    appName.text = item.label
+                    packgeName.text = item.packageName
                     appIcon.setImageDrawable(item.getApplicationIcon(baseContext.packageManager))
                 }
 
             }
         }
         adapter.onItemClickListener = { holder ->
-            if ( holder.item != null ) {
-                startActivity(baseContext.getPackageManager().getLaunchIntentForPackage(holder.item?.packageName))
+            holder.item?.let { item ->
+                startActivity(baseContext.packageManager.getLaunchIntentForPackage(item.packageName))
+                true
             }
-            true
+            false
         }
-        list_activity__list.setAdapter(adapter)
+        list_activity__list.adapter = adapter
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_list_activity, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when(item?.itemId) {
+            R.id.list_activity__menu_refresh -> {
+                object: AsyncDialogProgress<Unit, Unit>(this) {
+                    override fun doInBackground(vararg params: Unit?) {
+                        try {
+                            for ( i in 1..5) {
+                                Thread.sleep(1000)
+                                publishProgress("Test $i")
+                            }
+                        } catch (e: InterruptedException) {
+                        }
+
+                        return Unit
+                    }
+
+                }.execute()
+                return true
+            }
+            else -> return super.onContextItemSelected(item)
+        }
     }
 }
