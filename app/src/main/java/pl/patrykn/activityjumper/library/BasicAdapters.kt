@@ -23,8 +23,9 @@ abstract class GenericAdapter<Item>: RecyclerView.Adapter<GenericAdapter.ViewHol
         }
     }
 
-    abstract class ViewHolder<TYPE>(open val view: View) : RecyclerView.ViewHolder(view) {
+    abstract class ViewHolder<TYPE>(val view: View) : RecyclerView.ViewHolder(view) {
         constructor(context: Context, layoutId: Int, parent: ViewGroup?) : this(GetLayoutInflaterView(context, layoutId, parent))
+        constructor(layoutId: Int, parent: ViewGroup) : this(GetLayoutInflaterView(parent.context, layoutId, parent))
 
         var item: TYPE? = null
             set(value) {
@@ -100,6 +101,11 @@ abstract class CursorAdapter: GenericAdapter<Cursor?>() {
         if ( cursor?.isClosed == false ) {
             cursor.close()
         }
+    }
+
+    abstract class ViewHolder(view: View) : GenericAdapter.ViewHolder<Cursor>(view) {
+        constructor(context: Context, layoutId: Int, parent: ViewGroup?) : this(GetLayoutInflaterView(context, layoutId, parent))
+        constructor(layoutId: Int, parent: ViewGroup) : this(GetLayoutInflaterView(parent.context, layoutId, parent))
     }
 }
 

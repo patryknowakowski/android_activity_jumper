@@ -1,11 +1,8 @@
 package pl.patrykn.activityjumper
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
-import android.util.Log
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -13,10 +10,8 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_list.*
 import pl.patrykn.activityjumper.components.AppItem
 import pl.patrykn.activityjumper.components.GetAppItemList
-import pl.patrykn.activityjumper.library.AsyncDialog
 import pl.patrykn.activityjumper.library.AsyncDialogProgress
 import pl.patrykn.activityjumper.library.ListAdapter
-import java.util.*
 
 
 class ListActivity : AppCompatActivity() {
@@ -45,8 +40,8 @@ class ListActivity : AppCompatActivity() {
 
             }
         }
-        adapter.onItemClickListener = { holder ->
-            holder.item?.let { item ->
+        adapter.onItemClickListener = {
+            it.item?.let { item ->
                 startActivity(baseContext.packageManager.getLaunchIntentForPackage(item.packageName))
                 true
             }
