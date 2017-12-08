@@ -16,18 +16,19 @@ open class TableSchema(val name: String, vararg val columns: Pair<String, SqlTyp
 internal fun SQLiteDatabase.createTable(table: TableSchema, ifNotExists: Boolean = true) = this.createTable(table.name, ifNotExists, *table.columns)
 internal fun SQLiteDatabase.dropTable(table: TableSchema, ifExists: Boolean = true) = this.dropTable(table.name, ifExists)
 
-fun Cursor.getBoolean( columnName: String ): Boolean? = this.getIndex(columnName)?.let { this.getInt(it)?.let { if ( it == 1 ) true else false } }
-fun Cursor.getString( columnName: String ): String? = this.getIndex(columnName)?.let { this.getString(it) }
-fun Cursor.getInt( columnName: String ): Int? = this.getIndex(columnName)?.let { this.getInt(it) }
-fun Cursor.getLong( columnName: String ): Long? = this.getIndex(columnName)?.let { this.getLong(it) }
-fun Cursor.getFloat( columnName: String ): Float? = this.getIndex(columnName)?.let { this.getFloat(it) }
-fun Cursor.getDouble( columnName: String ): Double? = this.getIndex(columnName)?.let { this.getDouble(it) }
-fun Cursor.getBlob( columnName: String ): ByteArray? = this.getIndex(columnName)?.let { this.getBlob(it) }
+fun Cursor.getBoolean( columnName: String ): Boolean? = getInt(columnName)?.let { it == 1 }
+fun Cursor.getString( columnName: String ): String? = getIndexNotNull(columnName)?.let { getString(it) }
+fun Cursor.getInt( columnName: String ): Int? = getIndexNotNull(columnName)?.let { getInt(it) }
+fun Cursor.getShort( columnName: String ): Short? = getIndexNotNull(columnName)?.let { getShort(it) }
+fun Cursor.getLong( columnName: String ): Long? = getIndexNotNull(columnName)?.let { getLong(it) }
+fun Cursor.getFloat( columnName: String ): Float? = getIndexNotNull(columnName)?.let { getFloat(it) }
+fun Cursor.getDouble( columnName: String ): Double? = getIndexNotNull(columnName)?.let { getDouble(it) }
+fun Cursor.getBlob( columnName: String ): ByteArray? = getIndexNotNull(columnName)?.let { getBlob(it) }
 
-fun ContentValues.put(key: String, value: Boolean?) = this.put(key, value?.let { if ( it ) 1 else 0 } )
+fun ContentValues.put(key: String, value: Boolean?) = put(key, value?.let { if ( it ) 1 else 0 } )
 
-fun ContentValues.put(key: String, value: Date?) = this.put(key, value?.time)
-fun Cursor.getDate( columnName: String ): Date? = this.getIndex(columnName)?.let { Date(this.getLong(it)) }
+fun ContentValues.put(key: String, value: Date?) = put(key, value?.time)
+fun Cursor.getDate( columnName: String ): Date? = getIndexNotNull(columnName)?.let { Date(getLong(it)) }
 
 fun Cursor.tryClose() = { if (this.isOpen) this.close() }
 
@@ -61,5 +62,5 @@ val Cursor.iterator: Iterable<Cursor>
         }
     }
 
-
-fun Cursor.getIndex( columnName: String ): Int? = this.getColumnIndex(columnName).let { if (it == -1) null else it }
+fun Cursor.getIndexNotNull( columnName: String ): Int? = getIndex(columnName)?.let { if (isNull(it)) null else it };
+fun Cursor.getIndex( columnName: String ): Int? = getColumnIndex(columnName).let { if (it == -1) null else it }
