@@ -7,9 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
+typealias ItemClickListener<Item> = (holder : GenericAdapter.ViewHolder<Item>) -> Boolean
+
 abstract class GenericAdapter<Item>: RecyclerView.Adapter<GenericAdapter.ViewHolder<Item>>() {
-    var onItemClickListener: ((holder : ViewHolder<Item>) -> Boolean)? = null
-    var onItemLongClickListener: ((holder : ViewHolder<Item>) -> Boolean)? = null
+    var onItemClickListener: ItemClickListener<Item>? = null
+    var onItemLongClickListener: ItemClickListener<Item>? = null
 
     abstract fun getItem(position: Int): Item?
 

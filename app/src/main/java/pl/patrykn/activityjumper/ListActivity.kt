@@ -1,4 +1,5 @@
 package pl.patrykn.activityjumper
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
@@ -10,13 +11,12 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_list.*
 import pl.patrykn.activityjumper.components.AppItem
 import pl.patrykn.activityjumper.components.GetAppItemList
-import pl.patrykn.activityjumper.library.AsyncDialogProgress
+import pl.patrykn.activityjumper.library.IntentExtraString
 import pl.patrykn.activityjumper.library.ListAdapter
+import pl.patrykn.activityjumper.library.LogDebug
 
 
 class ListActivity : AppCompatActivity() {
-    private val LOG_TAG = this::class.java.simpleName
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
@@ -55,8 +55,20 @@ class ListActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+    override fun onResume() {
+        super.onResume()
+        LogDebug("Message = ${intent.message}")
+        LogDebug("Message2 = ${intent.message2}")
+    }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when(item?.itemId) {
+        var intent = Intent(this, ListActivity::class.java)
+        intent.message = "test"
+        intent.message2 = "test2"
+        startActivity(intent)
+        return true
+
+        /*when(item?.itemId) {
             R.id.list_activity__menu_refresh -> {
                 object: AsyncDialogProgress<Unit, Unit>(this) {
                     override fun doInBackground(vararg params: Unit?) {
@@ -75,6 +87,11 @@ class ListActivity : AppCompatActivity() {
                 return true
             }
             else -> return super.onContextItemSelected(item)
-        }
+        }*/
+    }
+
+    companion object IntentOptions {
+        var Intent.message by IntentExtraString("message-fix")
+        var Intent.message2 by IntentExtraString()
     }
 }
