@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-typealias ItemClickListener<Item> = (holder : GenericAdapter.ViewHolder<Item>) -> Boolean
+typealias ItemClickListener<Item> = (adapter: GenericAdapter<Item>, holder : GenericAdapter.ViewHolder<Item>, item: Item?) -> Boolean
 
 abstract class GenericAdapter<Item>: RecyclerView.Adapter<GenericAdapter.ViewHolder<Item>>() {
     var onItemClickListener: ItemClickListener<Item>? = null
@@ -16,28 +16,25 @@ abstract class GenericAdapter<Item>: RecyclerView.Adapter<GenericAdapter.ViewHol
     abstract fun getItem(position: Int): Item?
 
     override fun onBindViewHolder(holder: ViewHolder<Item>, position: Int) {
-        holder.item = getItem(position)
-        holder.view.setOnClickListener {
-            onItemClickListener?.invoke(holder) ?: false
-        }
-        holder.view.setOnLongClickListener {
-            onItemLongClickListener?.invoke(holder) ?: false
-        }
+        //holder.item = getItem(position)
+        holder.decor(getItem(position))
+        holder.view.setOnClickListener { onItemClickListener?.invoke(this, holder, getItem(position)) ?: false }
+        holder.view.setOnLongClickListener { onItemLongClickListener?.invoke(this, holder, getItem(position)) ?: false }
     }
 
     abstract class ViewHolder<TYPE>(val view: View) : RecyclerView.ViewHolder(view) {
         constructor(context: Context, layoutId: Int, parent: ViewGroup?) : this(GetLayoutInflaterView(context, layoutId, parent))
         constructor(layoutId: Int, parent: ViewGroup) : this(GetLayoutInflaterView(parent.context, layoutId, parent))
 
-        var item: TYPE? = null
-            set(value) {
+        /*var item: TYPE? = null
+            decor(value) {
                 field = value
                 if ( value != null ) {
-                    set(value)
+                    decor(value)
                 }
-            }
+            }*/
 
-        abstract fun set(item: TYPE)
+        abstract fun decor(item: TYPE?)
 
         fun <T : View> findViewById(id: Int): T {
             return view.findViewById(id)
@@ -65,7 +62,7 @@ abstract class ListAdapter<Item>
     }
 }
 
-abstract class CursorAdapter: GenericAdapter<Cursor?>() {
+abstract class CursorAdapter: GenericAdapter<Cursor>() {
     var cursor: Cursor? = null
         private set
 
@@ -88,7 +85,7 @@ abstract class CursorAdapter: GenericAdapter<Cursor?>() {
     }
 
     fun swapCursor(): Cursor? {
-        return swapCursor(generateCursor());
+        return swapCursor(generateCursor())
     }
 
     fun swapCursor(cursor: Cursor?): Cursor? {
@@ -98,6 +95,10 @@ abstract class CursorAdapter: GenericAdapter<Cursor?>() {
     }
 
     abstract fun generateCursor(): Cursor?
+
+    fun close() {
+        close(cursor)
+    }
 
     fun close(cursor: Cursor?) {
         if ( cursor?.isClosed == false ) {

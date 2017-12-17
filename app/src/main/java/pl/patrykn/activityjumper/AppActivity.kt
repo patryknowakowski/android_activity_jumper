@@ -5,12 +5,12 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_app.*
+import kotlinx.android.synthetic.main.content_app.*
 import pl.patrykn.activityjumper.components.AppItem
 import pl.patrykn.activityjumper.library.IntentCompanion
 import pl.patrykn.activityjumper.library.IntentExtra
 
 class AppActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app)
@@ -26,10 +26,11 @@ class AppActivity : AppCompatActivity() {
         super.onResume()
         intentCompanion.params(this) {
             setTitle(it.app?.label)
+            content_app.setText(it.app?.toString())
         }
     }
 
-    object intentCompanion: IntentCompanion<intentExtra>(intentExtra, AppActivity::class)
+    object intentCompanion: IntentCompanion<intentExtra>(AppActivity::class, intentExtra)
 
     object intentExtra : IntentExtra() {
         var Intent.app by ExtraParcelable<AppItem>()

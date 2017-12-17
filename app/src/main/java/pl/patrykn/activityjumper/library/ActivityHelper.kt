@@ -24,7 +24,7 @@ fun Context.Logger(priority:Int, msg: String, tr: Throwable? = null) = Log.print
 val Context.LOG_TAG
         get() = this.javaClass.simpleName
 
-abstract class IntentCompanion<out IntentOptions>(val intentOptions: IntentOptions, kclass: KClass<out Activity> ) {
+abstract class IntentCompanion<IntentOptions>(kclass: KClass<out Activity>, val intentOptions: IntentOptions) {
     val javaClass = kclass.java
 
     inline fun startActivity(context: Context, configureIntent: IntentOptions.(Intent) -> Unit) =
